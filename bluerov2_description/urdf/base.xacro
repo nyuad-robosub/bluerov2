@@ -68,9 +68,6 @@
         <!-- This visual geometry representation can be used when running
              tasks in which you need Gazebo to start quickly
         -->
-        <!-- <xacro:if value="${use_simplified_mesh}"> -->
-        <!-- Code in rexrov2_base.xacro if use the flag use_simplified_mesh -->
-
         <visual>
           <origin xyz="0 0 0" rpy="0 0 0"/>
           <geometry>
@@ -90,6 +87,19 @@
 
     <gazebo reference="${namespace}/base_link">
       <selfCollide>false</selfCollide>
+
+      <!-- ### -->
+      <!-- Add quick IMU to base_link for ArduPilot plugin -->
+      <sensor name="imu_sensor" type="imu">
+        <pose>0 0 0 0 0 0</pose>
+        <always_on>1</always_on>
+        <update_rate>40.0</update_rate>
+        <!-- noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.050</stddev>
+        </noise -->
+      </sensor>
     </gazebo>
 
     <!-- Set up hydrodynamic plugin given as input parameter -->
@@ -102,4 +112,114 @@
     <xacro:include filename="$(find bluerov2_description)/urdf/sensors.xacro"/>
 
   </xacro:macro>
+
+  <!-- ### -->
+  <!-- Add ArduPilot plugin -->
+  <!-- Some modifiable constants -->
+    <!--
+      incoming control command [0, 1]
+      so offset it by -0.5 to get [-0.5, 0.5].
+      multiplier = 102
+      Positive thrust = 51
+      Negative thrust = -41
+    -->
+  <!-- SITL control multiplier -->
+  <xacro:property name="multiplier" value="50"/>
+  <!-- cmd_max and cmd_min -->
+  <xacro:property name="cmd_max" value="51"/>
+  <xacro:property name="cmd_max" value="-40"/>
+
+  <gazebo>
+    <plugin name="ArduPilotPlugin" filename="libArduPilotPlugin.so">
+      <fdm_addr>127.0.0.1</fdm_addr>
+      <fdm_port_in>9002</fdm_port_in>
+      <fdm_port_out>9003</fdm_port_out>
+      <imuName>bluerov2::bluerov2/base_link::imu_sensor</imuName>
+      <connectionTimeoutMaxCount>10</connectionTimeoutMaxCount>
+
+      <control channel="0">
+        <type>EFFORT</type>
+        <offset>-0.5</offset>
+        <p_gain>1</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>51</cmd_max>
+        <cmd_min>-40</cmd_min>
+        <linkName>bluerov2::bluerov2/ap_dummy_thruster_0</linkName>
+        <multiplier>75</multiplier>
+      </control>
+
+      <control channel="1">
+        <type>EFFORT</type>
+        <offset>-0.5</offset>
+        <p_gain>1</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>51</cmd_max>
+        <cmd_min>-40</cmd_min>
+        <linkName>bluerov2::bluerov2/ap_dummy_thruster_1</linkName>
+        <multiplier>75</multiplier>
+      </control>
+
+      <control channel="2">
+        <type>EFFORT</type>
+        <offset>-0.5</offset>
+        <p_gain>1</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>51</cmd_max>
+        <cmd_min>-40</cmd_min>
+        <linkName>bluerov2::bluerov2/ap_dummy_thruster_2</linkName>
+        <multiplier>75</multiplier>
+      </control>
+
+      <control channel="3">
+        <type>EFFORT</type>
+        <offset>-0.5</offset>
+        <p_gain>1</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>51</cmd_max>
+        <cmd_min>-40</cmd_min>
+        <linkName>bluerov2::bluerov2/ap_dummy_thruster_3</linkName>
+        <multiplier>75</multiplier>
+      </control>
+
+      <control channel="4">
+        <type>EFFORT</type>
+        <offset>-0.5</offset>
+        <p_gain>1</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>51</cmd_max>
+        <cmd_min>-40</cmd_min>
+        <linkName>bluerov2::bluerov2/ap_dummy_thruster_4</linkName>
+        <multiplier>75</multiplier>
+      </control>
+
+      <control channel="5">
+        <type>EFFORT</type>
+        <offset>-0.5</offset>
+        <p_gain>1</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>51</cmd_max>
+        <cmd_min>-40</cmd_min>
+        <linkName>bluerov2::bluerov2/ap_dummy_thruster_5</linkName>
+        <multiplier>75</multiplier>
+      </control>
+    </plugin>
+  </gazebo>
 </robot>
