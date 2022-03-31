@@ -33,4 +33,16 @@
   <!-- Mount a GPS. -->
   <xacro:default_gps namespace="${namespace}" parent_link="${namespace}/base_link" />
 
+  <!-- ### -->
+  <!-- Add RealSense camera support -->
+  <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro" />
+  <xacro:sensor_d435 parent="${namespace}/base_link" 
+    use_nominal_extrinsics="true" 
+    add_plug="false" 
+    use_mesh="true" 
+    name="camera" 
+    topics_ns="camera" 
+    publish_pointcloud="true">
+    <origin xyz="0.2 0 0" rpy="0 0 0"/>
+  </xacro:sensor_d435>
 </robot>
