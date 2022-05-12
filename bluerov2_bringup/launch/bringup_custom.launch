@@ -14,7 +14,7 @@
 
   <include file="$(find bluerov2_description)/launch/upload.launch">
     <arg name="use_geodetic" value="false"/>
-    <arg name="x" value="-15"/>
+    <arg name="x" value="-13"/>
     <arg name="y" value="0"/>
     <arg name="z" value="-50"/>
   </include>

@@ -1,0 +1,307 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Loading some constants -->
+  <xacro:include filename="$(find uuv_descriptions)/urdf/common.urdf.xacro"/>
+  <!-- Loading file with sensor macros -->
+  <xacro:include filename="$(find uuv_sensor_ros_plugins)/urdf/sensor_snippets.xacro"/>
+  <!-- Loading vehicle's specific macros -->
+  <xacro:include filename="$(find bluerov2_heavy_description)/urdf/snippets.xacro"/>
+
+  <!-- ADDED  -->
+  <xacro:include filename="$(find uuv_gazebo_ros_plugins)/urdf/snippets.xacro"/>
+
+  <!--
+    Vehicle's parameters (remember to enter the model parameters below)
+  -->
+  <!-- Mass -->
+  <xacro:property name="mass" value="11.5"/>
+  <!-- Describing the dimensions of the vehicle's bounding box: width, length, height -->
+  <xacro:property name="x_size" value="0.448"/>
+  <xacro:property name="y_size" value="0.575"/>
+  <xacro:property name="z_size" value="0.28066"/>
+  <!-- minion_usv_height is not really! It's just for run... We need first calculate the Fossen parameters -->
+  <!-- Volume -->
+  <xacro:property name="volume" value="0.011054"/>
+  <!-- Center of gravity -->
+  <xacro:property name="cog" value="0 0 0"/>
+  <!--
+  Center of buoyancy according to eq. (3.1) p. 28 in Berg2012.
+  The original values, [0.0822, -0.00773, 0.3872] however, seem to
+  assume NWU (otherwise cob is below cog?). 0.155
+  -->
+  <xacro:property name="cob" value="0 0 0.3"/>
+  <!-- Fluid density -->
+  <xacro:property name="rho" value="1028"/>
+  <!--
+    Visual mesh file for the vehicle, usually in DAE (Collada) format. Be sure to store the
+    mesh with the origin of the mesh on the same position of the center of mass, otherwise
+    the mesh pose will have to be corrected below in the <visual> block.
+    Open the meshes for the RexROV vehicle in Blender to see an example on the mesh placement.
+  -->
+  <xacro:property name="visual_mesh_file" value="file://$(find bluerov2_heavy_description)/meshes/bluerov2_noprop.dae"/>
+
+  <!-- Collision geometry mesh, usually in STL format (it is recommended to keep
+  this geometry as simple as possible to improve the performance the physics engine
+  regarding the computation of collision forces) -->
+  <xacro:property name="collision_mesh_file" value="file://$(find bluerov2_heavy_description)/meshes/bluerov2_noprop.stl"/>
+
+  <!-- Vehicle macro -->
+  <!-- <xacro:macro name="bluerov2_base" params="namespace debug *gazebo"> -->
+  <xacro:macro name="bluerov2_base" params="namespace *gazebo">
+
+      <!-- Rigid body description of the base link -->
+      <link name="${namespace}/base_link">
+        <!--
+          Be careful to setup the coefficients for the inertial tensor,
+          otherwise your model will become unstable on Gazebo
+        -->
+        <inertial>
+          <mass value="${mass}" />
+          <origin xyz="${cog}" rpy="0 0 0"/>
+          <!-- <inertia ixx="525.39" ixy="1.44" ixz="33.41" iyy="794.20" iyz="2.6" izz="691.23"/> -->
+          <inertia
+            ixx="${0.2*mass*y_size*y_size + 0.2*mass*z_size*z_size}" ixy="0.0" ixz="0.0"
+            iyy="${0.2*mass*x_size*x_size + 0.2*mass*z_size*z_size}" iyz="0.0"
+            izz="${0.2*mass*x_size*x_size + 0.2*mass*y_size*y_size}" />
+        </inertial>
+
+        <!-- This visual geometry representation can be used when running
+             tasks in which you need Gazebo to start quickly
+        -->
+        <visual>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry>
+            <mesh filename="${visual_mesh_file}" scale="1 1 1" />
+          </geometry>
+        </visual>
+
+        <!-- In rexrov2_base they made collision planes to minize the GPU load -->
+        <collision>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry>
+            <mesh filename="${collision_mesh_file}" scale="1 1 1" />
+          </geometry>
+        </collision>
+
+      </link>
+
+    <gazebo reference="${namespace}/base_link">
+      <selfCollide>false</selfCollide>
+
+      <!-- ### -->
+      <!-- Add quick IMU to base_link for ArduPilot plugin -->
+      <sensor name="imu_sensor" type="imu">
+        <imu>
+          <angular_velocity>
+            <x>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>2e-4</stddev>
+                <bias_mean>0.0000075</bias_mean>
+                <bias_stddev>0.0000008</bias_stddev>
+              </noise>
+            </x>
+            <y>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>2e-4</stddev>
+                <bias_mean>0.0000075</bias_mean>
+                <bias_stddev>0.0000008</bias_stddev>
+              </noise>
+            </y>
+            <z>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>2e-4</stddev>
+                <bias_mean>0.0000075</bias_mean>
+                <bias_stddev>0.0000008</bias_stddev>
+              </noise>
+            </z>
+          </angular_velocity>
+          <linear_acceleration>
+            <x>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>1.7e-2</stddev>
+                <bias_mean>0.1</bias_mean>
+                <bias_stddev>0.001</bias_stddev>
+              </noise>
+            </x>
+            <y>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>1.7e-2</stddev>
+                <bias_mean>0.1</bias_mean>
+                <bias_stddev>0.001</bias_stddev>
+              </noise>
+            </y>
+            <z>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>1.7e-2</stddev>
+                <bias_mean>0.1</bias_mean>
+                <bias_stddev>0.001</bias_stddev>
+              </noise>
+            </z>
+          </linear_acceleration>
+        </imu>
+        <pose>0 0 0 0 0 0</pose>
+        <always_on>1</always_on>
+        <update_rate>100.0</update_rate>
+        <!-- noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.050</stddev>
+        </noise -->
+      </sensor>
+    </gazebo>
+
+    <!-- Set up hydrodynamic plugin given as input parameter -->
+    <xacro:insert_block name="gazebo"/>
+
+    <!-- Include the actuators modules: Thrusters, Beacon -->
+    <xacro:include filename="$(find bluerov2_heavy_description)/urdf/actuators.xacro" />
+
+    <!-- Include the sensor modules: 3D Pose, IMU, Pressure, Camera -->
+    <xacro:include filename="$(find bluerov2_heavy_description)/urdf/sensors.xacro"/>
+
+  </xacro:macro>
+
+  <!-- ### -->
+  <!-- Add ArduPilot plugin -->
+  <!-- Some modifiable constants -->
+    <!--
+      incoming control command [0, 1]
+      so offset it by -0.5 to get [-0.5, 0.5].
+      multiplier = 102
+      Positive thrust = 51
+      Negative thrust = -41
+    -->
+  <!-- SITL control multiplier -->
+  <xacro:property name="multiplier" value="50"/>
+  <!-- cmd_max and cmd_min -->
+  <xacro:property name="cmd_max" value="51"/>
+  <xacro:property name="cmd_max" value="-40"/>
+
+  <gazebo>
+    <plugin name="ArduPilotPlugin" filename="libArduPilotPlugin.so">
+      <fdm_addr>127.0.0.1</fdm_addr>
+      <fdm_port_in>9002</fdm_port_in>
+      <fdm_port_out>9003</fdm_port_out>
+      <imuName>bluerov2::bluerov2/base_link::imu_sensor</imuName>
+      <connectionTimeoutMaxCount>10</connectionTimeoutMaxCount>
+
+      <control channel="0">
+        <type>EFFORT</type>
+        <offset>-0.5</offset>
+        <p_gain>1</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>51</cmd_max>
+        <cmd_min>-40</cmd_min>
+        <linkName>bluerov2::bluerov2/ap_dummy_thruster_0</linkName>
+        <multiplier>75</multiplier>
+      </control>
+
+      <control channel="1">
+        <type>EFFORT</type>
+        <offset>-0.5</offset>
+        <p_gain>1</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>51</cmd_max>
+        <cmd_min>-40</cmd_min>
+        <linkName>bluerov2::bluerov2/ap_dummy_thruster_1</linkName>
+        <multiplier>75</multiplier>
+      </control>
+
+      <control channel="2">
+        <type>EFFORT</type>
+        <offset>-0.5</offset>
+        <p_gain>1</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>51</cmd_max>
+        <cmd_min>-40</cmd_min>
+        <linkName>bluerov2::bluerov2/ap_dummy_thruster_2</linkName>
+        <multiplier>75</multiplier>
+      </control>
+
+      <control channel="3">
+        <type>EFFORT</type>
+        <offset>-0.5</offset>
+        <p_gain>1</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>51</cmd_max>
+        <cmd_min>-40</cmd_min>
+        <linkName>bluerov2::bluerov2/ap_dummy_thruster_3</linkName>
+        <multiplier>75</multiplier>
+      </control>
+
+      <control channel="4">
+        <type>EFFORT</type>
+        <offset>-0.5</offset>
+        <p_gain>1</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>51</cmd_max>
+        <cmd_min>-40</cmd_min>
+        <linkName>bluerov2::bluerov2/ap_dummy_thruster_4</linkName>
+        <multiplier>75</multiplier>
+      </control>
+
+      <control channel="5">
+        <type>EFFORT</type>
+        <offset>-0.5</offset>
+        <p_gain>1</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>51</cmd_max>
+        <cmd_min>-40</cmd_min>
+        <linkName>bluerov2::bluerov2/ap_dummy_thruster_5</linkName>
+        <multiplier>75</multiplier>
+      </control>
+
+      <control channel="6">
+        <type>EFFORT</type>
+        <offset>-0.5</offset>
+        <p_gain>1</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>51</cmd_max>
+        <cmd_min>-40</cmd_min>
+        <linkName>bluerov2::bluerov2/ap_dummy_thruster_6</linkName>
+        <multiplier>75</multiplier>
+      </control>
+
+      <control channel="7">
+        <type>EFFORT</type>
+        <offset>-0.5</offset>
+        <p_gain>1</p_gain>
+        <i_gain>0</i_gain>
+        <d_gain>0</d_gain>
+        <i_max>0</i_max>
+        <i_min>0</i_min>
+        <cmd_max>51</cmd_max>
+        <cmd_min>-40</cmd_min>
+        <linkName>bluerov2::bluerov2/ap_dummy_thruster_7</linkName>
+        <multiplier>75</multiplier>
+      </control>
+    </plugin>
+  </gazebo>
+</robot>
