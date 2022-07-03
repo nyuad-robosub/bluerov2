@@ -1,9 +1,0 @@
-pid:
-  mass: 11000.0
-  inertial:
-    ixx: 11000.0
-    ixy: 0
-    ixz: 0
-    iyy: 11000.0
-    iyz: 0
-    izz: 11000.0
