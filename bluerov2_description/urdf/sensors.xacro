@@ -21,14 +21,24 @@
     <origin xyz="0 0 0" rpy="0 0 0"/>
   </xacro:default_pressure>
 
-  <!-- Mount a camera -->
-  <xacro:bluerov_camera namespace="" parent_link="${namespace}/base_link" suffix="_front">
-    <origin xyz="0.2 0 0" rpy="0 0 0"/>
-  </xacro:bluerov_camera>
-
-  <xacro:bluerov_camera namespace="" parent_link="${namespace}/base_link" suffix="_down">
+  <!-- Sonar Sensor -->
+  <!-- <xacro:bluerov_altimeter namespace="${namespace}" parent_link="${namespace}/base_link">
     <origin xyz="0 0 -0.2" rpy="0 ${pi/2} 0"/>
+  </xacro:bluerov_altimeter> -->
+
+  <!-- Mount a camera -->
+  <xacro:bluerov_camera namespace="" parent_link="${namespace}/base_link" suffix="_down"
+    width="640" height="400" hfov="1.2">
+    <origin xyz="0 0 -0.14" rpy="0 ${pi/2} 0"/>
   </xacro:bluerov_camera>
+  
+  <!-- <xacro:bluerov_camera namespace="" parent_link="${namespace}/base_link" suffix="_front">
+    <origin xyz="0.2 0 0" rpy="0 0 0"/>
+  </xacro:bluerov_camera> -->
+
+  <!-- <xacro:bluerov_camera namespace="" parent_link="${namespace}/base_link" suffix="_down">
+    <origin xyz="0 0 -0.11" rpy="0 ${pi/2} 0"/>
+  </xacro:bluerov_camera> -->
 
   <!-- Mount a GPS. -->
   <xacro:default_gps namespace="${namespace}" parent_link="${namespace}/base_link" />
